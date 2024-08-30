@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeadHunter System</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #ECF0F1;
+        margin: 0;
+        padding: 0;
+        transition: margin-left 0.5s;
+    }
+
+    .sidebar {
+        width: 240px;
+        background-color: #2A3F54;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding-top: 60px;
+        color: white;
+        transition: width 0.5s, transform 0.5s, background-color 0.5s;
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.collapsed {
+        background-color: #2A3F54;
+        width: 60px;
+        transform: translateX(0);
+        padding-top: 20px;
+    }
+
+    .sidebar.collapsed h2,
+    .sidebar.collapsed a {
+        display: none;
+    }
+
+    .sidebar h2 {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #FFFFFF;
+    }
+
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        color: #FFFFFF;
+        padding: 10px 20px;
+        text-decoration: none;
+        font-size: 18px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .sidebar a i {
+        margin-right: 10px;
+        font-size: 24px;
+    }
+
+    .sidebar a:hover {
+        background-color: #34495E;
+    }
+
+    .sidebar.collapsed a {
+        justify-content: center;
+        padding: 15px 0;
+        color: white;
+    }
+
+    .sidebar.collapsed a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+        padding: 15px;
+        background-color: #34495E;
+        color: white;
+        margin-left: 240px;
+        transition: margin-left 0.5s, left 0.5s;
+        position: relative;
+    }
+
+    .header.collapsed {
+        margin-left: 60px;
+        left: 0; /* Removido o espaço em branco */
+    }
+
+    .content {
+        margin-left: 240px;
+        padding: 20px;
+        transition: margin-left 0.5s;
+        background-color: #FFFFFF;
+        border-radius: 8px;
+    }
+
+    .content.collapsed {
+        margin-left: 60px;
+    }
+
+    .toggle-btn {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        z-index: 1100;
+        font-size: 24px;
+    }
+
+    .tabs {
+        overflow: hidden;
+        background-color: #ECF0F1;
+        border-bottom: 2px solid #bdc3c7;
+    }
+
+    .tabs button {
+        background-color: inherit;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: background-color 0.3s;
+        font-size: 18px;
+        color: #34495E;
+    }
+
+    .tabs button:hover {
+        background-color: #ddd;
+    }
+
+    .tabs button.active {
+        background-color: #2980B9;
+        color: white;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #bdc3c7;
+        border-top: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #bdc3c7;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #2A3F54;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+        cursor: pointer;
+    }
+
+    .status-indicator {
+        height: 12px;
+        width: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .status-aberta {
+        background-color: #2ECC71;
+    }
+
+    .status-entrevista {
+        background-color: #F39C12;
+    }
+
+    .status-fechada {
+        background-color: #E74C3C;
+    }
+
+    .status-disponivel {
+        background-color: #2ECC71;
+    }
+
+    .status-primeira-entrevista {
+        background-color: #F39C12;
+    }
+
+    .status-empregado {
+        background-color: #2ECC71;
+    }
+
+    .status-reprovado {
+        background-color: #E74C3C;
+    }
+
+    .search-bar {
+        padding: 10px;
+        margin: 10px 0;
+        background-color: #ECF0F1;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+    }
+
+    .search-bar input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+    }
+
+    .crud-buttons {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    .crud-buttons button {
+        padding: 10px 20px;
+        margin-left: 5px;
+        background-color: #2980B9;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .crud-buttons button:hover {
+        background-color: #3498DB;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #bdc3c7;
+        width: 50%;
+        position: relative;
+        border-radius: 8px;
+    }
+
+    .close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background-color: #2980B9;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        text-align: center;
+        line-height: 30px;
+    }
+
+    .close:hover {
+        background-color: #3498DB;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group label {
+        margin-bottom: 5px;
+        display: block;
+        color: #34495E;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        border-radius: 4px;
+        font-size: 16px;
+        background-color: #f0f0f0;
+    }
+
+    .form-group .edit-icon {
+        position: absolute;
+        right: 10px;
+        top: 35px;
+        cursor: pointer;
+        color: #2980B9;
+    }
+
+    .form-group input.editable, .form-group textarea.editable {
+        pointer-events: auto;
+        background-color: white;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+    }
+
+    .form-actions {
+        text-align: right;
+    }
+
+    .form-actions button {
+        padding: 10px 20px;
+        background-color: #2980B9;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .form-actions button:hover {
+        background-color: #3498DB;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <h2>HeadHunter System</h2>
+  <a href="#" onclick="openTab('dashboard')"><i class="material-icons">dashboard</i> Dashboard</a>
+  <a href="#" onclick="openTab('employers')"><i class="material-icons">business_center</i> Employer Form</a>
+  <a href="#" onclick="openTab('candidates')"><i class="material-icons">people</i> Candidate Form</a>
+  <a href="#" onclick="openTab('status-employees')"><i class="material-icons">assignment_ind</i> Employee Status</a>
+  <a href="#" onclick="openTab('status-employers')"><i class="material-icons">work_outline</i> Employer Status</a>
+  <a href="#" onclick="openTab('settings')"><i class="material-icons">settings</i> Settings</a>
+</div>
+
+<button class="toggle-btn" id="toggleSidebarBtn" onclick="toggleSidebar()">
+  <i class="material-icons">menu</i>
+</button>
+
+<div class="header" id="header">
+  <h1>Vagas Disponíveis</h1>
+</div>
+
+<div class="content" id="content">
+  <div class="tabs">
+    <button class="tablink" onclick="openTab('dashboard')" id="defaultOpen">Vagas</button>
+    <button class="tablink" onclick="openTab('employers')">Formulário do Empregador</button>
+    <button class="tablink" onclick="openTab('candidates')">Formulário do Candidato</button>
+    <button class="tablink" onclick="openTab('status-employees')">Status dos Empregados</button>
+    <button class="tablink" onclick="openTab('status-employers')">Status das Vagas</button>
+    <button class="tablink" onclick="openTab('settings')">Configurações</button>
+  </div>
+
+  <div id="dashboard" class="tab-content">
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar vagas...">
+    </div>
+    <table>
+      <tr>
+        <th></th>
+        <th>Empresa</th>
+        <th>Título da Vaga</th>
+        <th>Descrição</th>
+        <th>Status</th>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="job-selection"></td>
+        <td>ABC Corp</td>
+        <td>Desenvolvedor Java</td>
+        <td>Desenvolvimento de sistemas backend em Java.</td>
+        <td><span class="status-indicator status-aberta"></span>Aberta</td>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="job-selection"></td>
+        <td>XYZ Tech</td>
+        <td>Analista de Dados</td>
+        <td>Responsável pela análise de dados corporativos.</td>
+        <td><span class="status-indicator status-entrevista"></span>Em Entrevistas</td>
+      </tr>
+      <!-- Adicione mais linhas conforme necessário -->
+    </table>
+  </div>
+
+  <div id="employers" class="tab-content">
+    <h2>Formulário do Empregador</h2>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar empregador...">
+    </div>
+    <div class="crud-buttons">
+      <button onclick="openModal('addJobModal')">Adicionar Vaga</button>
+      <button onclick="openModal('editJobModal')">Editar Vaga</button>
+      <button>Deletar Vaga</button>
+    </div>
+    <table>
+      <tr>
+        <th></th>
+        <th>Empresa</th>
+        <th>Título da Vaga</th>
+        <th>Status</th>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="employer-selection"></td>
+        <td>ABC Corp</td>
+        <td>Desenvolvedor Java</td>
+        <td><span class="status-indicator status-aberta"></span>Aberta</td>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="employer-selection"></td>
+        <td>XYZ Tech</td>
+        <td>Analista de Dados</td>
+        <td><span class="status-indicator status-entrevista"></span>Em Entrevistas</td>
+      </tr>
+      <!-- Adicione mais linhas conforme necessário -->
+    </table>
+  </div>
+
+  <div id="candidates" class="tab-content">
+    <h2>Formulário do Candidato</h2>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar candidatos pelo nome...">
+    </div>
+    <div class="crud-buttons">
+      <button onclick="openModal('addCandidateModal')">Adicionar Candidato</button>
+      <button onclick="openModal('editCandidateModal')">Editar Candidato</button>
+      <button>Deletar Candidato</button>
+    </div>
+    <table>
+      <tr>
+        <th></th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Habilidades</th>
+        <th>Status</th>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="candidate-selection"></td>
+        <td>John Doe</td>
+        <td>john.doe@example.com</td>
+        <td>(11) 99999-9999</td>
+        <td>Java, Spring Boot</td>
+        <td><span class="status-indicator status-disponivel"></span>Disponível</td>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="candidate-selection"></td>
+        <td>Jane Smith</td>
+        <td>jane.smith@example.com</td>
+        <td>(21) 88888-8888</td>
+        <td>Python, Data Analysis</td>
+        <td><span class="status-indicator status-primeira-entrevista"></span>Primeira Entrevista</td>
+      </tr>
+      <!-- Adicione mais linhas conforme necessário -->
+    </table>
+  </div>
+
+  <div id="status-employees" class="tab-content">
+    <h2>Status dos Empregados</h2>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar empregados...">
+    </div>
+    <table>
+      <tr>
+        <th></th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Habilidades</th>
+        <th>Status</th>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="status-employee-selection"></td>
+        <td>John Doe</td>
+        <td>john.doe@example.com</td>
+        <td>(11) 99999-9999</td>
+        <td>Java, Spring Boot</td>
+        <td><span class="status-indicator status-primeira-entrevista"></span>Primeira Entrevista</td>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="status-employee-selection"></td>
+        <td>Jane Smith</td>
+        <td>jane.smith@example.com</td>
+        <td>(21) 88888-8888</td>
+        <td>Python, Data Analysis</td>
+        <td><span class="status-indicator status-disponivel"></span>Disponível</td>
+      </tr>
+      <!-- Adicione mais linhas conforme necessário -->
+    </table>
+  </div>
+
+  <div id="status-employers" class="tab-content">
+    <h2>Status das Vagas</h2>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar vagas...">
+    </div>
+    <table>
+      <tr>
+        <th></th>
+        <th>Empresa</th>
+        <th>Título da Vaga</th>
+        <th>Descrição</th>
+        <th>Status</th>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="status-employer-selection"></td>
+        <td>ABC Corp</td>
+        <td>Desenvolvedor Java</td>
+        <td>Desenvolvimento de sistemas backend em Java.</td>
+        <td><span class="status-indicator status-aberta"></span>Aberta</td>
+      </tr>
+      <tr onclick="selectRow(this)">
+        <td><input type="radio" name="status-employer-selection"></td>
+        <td>XYZ Tech</td>
+        <td>Analista de Dados</td>
+        <td>Responsável pela análise de dados corporativos.</td>
+        <td><span class="status-indicator status-entrevista"></span>Em Entrevistas</td>
+      </tr>
+      <!-- Adicione mais linhas conforme necessário -->
+    </table>
+  </div>
+
+  <div id="settings" class="tab-content">
+    <h2>Configurações do Sistema</h2>
+    <p>Aqui você pode configurar as opções do sistema.</p>
+  </div>
+</div>
+
+<!-- Modal for Adding Job -->
+<div id="addJobModal" class="modal">
+  <div class="modal-content">
+    <button class="close" onclick="closeModal('addJobModal')">&times;</button>
+    <h2>Adicionar Vaga</h2>
+    <form>
+      <div class="form-group">
+        <label for="job-title">Título da Vaga</label>
+        <input type="text" id="job-title" placeholder="Digite o título da vaga">
+      </div>
+      <div class="form-group">
+        <label for="job-description">Descrição da Vaga</label>
+        <textarea id="job-description" placeholder="Digite a descrição da vaga"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="salary">Salário</label>
+        <input type="text" id="salary" placeholder="Digite o intervalo salarial">
+      </div>
+      <div class="form-group">
+        <label for="location">Localização</label>
+        <input type="text" id="location" placeholder="Digite a localização da vaga">
+      </div>
+      <div class="form-group">
+        <label for="experience">Experiência Necessária</label>
+        <input type="text" id="experience" placeholder="Digite a experiência necessária">
+      </div>
+      <div class="form-group">
+        <label for="skills">Habilidades Necessárias</label>
+        <textarea id="skills" placeholder="Digite as habilidades necessárias"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for Editing Job -->
+<div id="editJobModal" class="modal">
+  <div class="modal-content">
+    <button class="close" onclick="closeModal('editJobModal')">&times;</button>
+    <h2>Editar Vaga</h2>
+    <form>
+      <div class="form-group">
+        <label for="edit-job-title">Título da Vaga</label>
+        <input type="text" id="edit-job-title" placeholder="Digite o título da vaga" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-job-title')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-job-description">Descrição da Vaga</label>
+        <textarea id="edit-job-description" placeholder="Digite a descrição da vaga" disabled></textarea>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-job-description')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-salary">Salário</label>
+        <input type="text" id="edit-salary" placeholder="Digite o intervalo salarial" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-salary')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-location">Localização</label>
+        <input type="text" id="edit-location" placeholder="Digite a localização da vaga" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-location')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-experience">Experiência Necessária</label>
+        <input type="text" id="edit-experience" placeholder="Digite a experiência necessária" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-experience')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-skills">Habilidades Necessárias</label>
+        <textarea id="edit-skills" placeholder="Digite as habilidades necessárias" disabled></textarea>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-skills')">edit</i>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for Adding Candidate -->
+<div id="addCandidateModal" class="modal">
+  <div class="modal-content">
+    <button class="close" onclick="closeModal('addCandidateModal')">&times;</button>
+    <h2>Adicionar Candidato</h2>
+    <form>
+      <div class="form-group">
+        <label for="candidate-name">Nome</label>
+        <input type="text" id="candidate-name" placeholder="Digite o nome do candidato">
+      </div>
+      <div class="form-group">
+        <label for="candidate-email">Email</label>
+        <input type="email" id="candidate-email" placeholder="Digite o email do candidato">
+      </div>
+      <div class="form-group">
+        <label for="candidate-phone">Telefone</label>
+        <input type="text" id="candidate-phone" placeholder="Digite o telefone do candidato">
+      </div>
+      <div class="form-group">
+        <label for="candidate-experience">Experiência</label>
+        <input type="text" id="candidate-experience" placeholder="Digite a experiência do candidato">
+      </div>
+      <div class="form-group">
+        <label for="candidate-skills">Habilidades</label>
+        <textarea id="candidate-skills" placeholder="Digite as habilidades do candidato"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="candidate-status">Status</label>
+        <select id="candidate-status">
+          <option value="disponivel">Disponível</option>
+          <option value="primeira-entrevista">Primeira Entrevista</option>
+          <option value="entrevista-empresa">Entrevista com a Empresa</option>
+          <option value="empregado">Empregado</option>
+          <option value="reprovado">Reprovado</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for Editing Candidate -->
+<div id="editCandidateModal" class="modal">
+  <div class="modal-content">
+    <button class="close" onclick="closeModal('editCandidateModal')">&times;</button>
+    <h2>Editar Candidato</h2>
+    <form>
+      <div class="form-group">
+        <label for="edit-candidate-name">Nome</label>
+        <input type="text" id="edit-candidate-name" placeholder="Digite o nome do candidato" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-candidate-name')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-candidate-email">Email</label>
+        <input type="email" id="edit-candidate-email" placeholder="Digite o email do candidato" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-candidate-email')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-candidate-phone">Telefone</label>
+        <input type="text" id="edit-candidate-phone" placeholder="Digite o telefone do candidato" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-candidate-phone')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-candidate-experience">Experiência</label>
+        <input type="text" id="edit-candidate-experience" placeholder="Digite a experiência do candidato" disabled>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-candidate-experience')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-candidate-skills">Habilidades</label>
+        <textarea id="edit-candidate-skills" placeholder="Digite as habilidades do candidato" disabled></textarea>
+        <i class="material-icons edit-icon" onclick="enableEditing('edit-candidate-skills')">edit</i>
+      </div>
+      <div class="form-group">
+        <label for="edit-candidate-status">Status</label>
+        <select id="edit-candidate-status">
+          <option value="disponivel">Disponível</option>
+          <option value="primeira-entrevista">Primeira Entrevista</option>
+          <option value="entrevista-empresa">Entrevista com a Empresa</option>
+          <option value="empregado">Empregado</option>
+          <option value="reprovado">Reprovado</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Função para abrir e fechar os modais
+  function openModal(modalId) {
+      document.getElementById(modalId).style.display = "block";
+  }
+
+  function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+  }
+
+  // Função para habilitar a edição de campos
+  function enableEditing(fieldId) {
+      var field = document.getElementById(fieldId);
+      field.classList.add("editable");
+      field.removeAttribute("disabled");
+  }
+
+  // Função para preencher os dados do modal de edição com os dados selecionados
+  function fillEditModal(modalId, data) {
+      for (const [key, value] of Object.entries(data)) {
+          document.getElementById(key).value = value;
+      }
+      openModal(modalId);
+  }
+
+  // Função para selecionar uma linha na tabela e marcar o radio button correspondente
+  function selectRow(row) {
+      var radio = row.querySelector('input[type="radio"]');
+      radio.checked = true;
+
+      // Exemplo de preenchimento de dados ao clicar em uma vaga para editar
+      if (radio.name === 'employer-selection') {
+          fillEditModal('editJobModal', {
+              'edit-job-title': row.cells[2].innerText,
+              'edit-job-description': row.cells[3].innerText,
+              'edit-location': 'Preencha a localização',
+              'edit-salary': 'Preencha o salário',
+              'edit-experience': 'Preencha a experiência',
+              'edit-skills': 'Preencha as habilidades'
+          });
+      }
+
+      // Exemplo de preenchimento de dados ao clicar em um candidato para editar
+      if (radio.name === 'candidate-selection') {
+          fillEditModal('editCandidateModal', {
+              'edit-candidate-name': row.cells[1].innerText,
+              'edit-candidate-email': row.cells[2].innerText,
+              'edit-candidate-phone': row.cells[3].innerText,
+              'edit-candidate-experience': 'Preencha a experiência',
+              'edit-candidate-skills': row.cells[4].innerText
+          });
+      }
+  }
+
+  // Função para gerenciar as abas
+  function openTab(tabName) {
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablink");
+      for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      document.getElementById(tabName).style.display = "block";
+      event.currentTarget.className += " active";
+  }
+
+  // Função para recolher e expandir a barra lateral
+  function toggleSidebar() {
+      var sidebar = document.getElementById("sidebar");
+      var header = document.getElementById("header");
+      var content = document.getElementById("content");
+
+      if (sidebar.classList.contains("collapsed")) {
+          sidebar.classList.remove("collapsed");
+          header.classList.remove("collapsed");
+          content.classList.remove("collapsed");
+      } else {
+          sidebar.classList.add("collapsed");
+          header.classList.add("collapsed");
+          content.classList.add("collapsed");
+      }
+  }
+
+  // Abre a aba padrão ao carregar a página
+  document.getElementById("defaultOpen").click();
+
+  // Fecha o modal ao clicar fora dele
+  window.onclick = function(event) {
+      var modals = document.getElementsByClassName("modal");
+      for (var i = 0; i < modals.length; i++) {
+          if (event.target == modals[i]) {
+              modals[i].style.display = "none";
+          }
+      }
+  }
+</script>
+
+</body>
+</html>
